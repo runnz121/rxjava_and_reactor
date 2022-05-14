@@ -1,4 +1,4 @@
-## Chapter 1
+# Chapter 1
 
 ### 리엑티브 프로그래밍
 1. 기존 pull 방식의 프로그래밍 개념을 push 방식으로 바꿈
@@ -92,3 +92,64 @@ Executor 인터페이스를 구현한 클래스에 Callable 객체를 인자로 
 get() 메서드 호출 시 Callable 객체에서 구현한 계산 결과가 나올 떄 까지 블록킹 됨
 
 ### fromPublisher() 함수
+
+
+## Single 클래스
+Single 클래스는 1개의 데이터만 발행하도록 한정함(결과가 유일한 서버에 사용)
+발행과 동시에 종료됨(onSuccess) // 라이프 사이클 관점에서 onNext() + onComplete()가 통합됨
+
+### just() 함수
+기존의 observable 과 비슷한 방법으로 활용 -> single 객체 생성 
+
+### single.fromObservable()
+첫번쨰 값 발행후 onSuccess 이벤트 발행 후 종료
+
+### single(default value)
+single 내부에 기본 값을 갖음 observable에서 발행이 되지 않을 떄도 인자를 넣은 기본값을 대신 발행
+
+### fromArray(array).first()
+first() 를 호출시 single 객체로 변환됨
+첫번째 데이터 발행후 onSuccess 이벤트 발생 종료
+
+### empty()
+empty()함수를 통해서 onSuccess 이벤트 발생
+Defautl value 를 설정할 수 있음
+
+## Maybe 클래스
+최대 데이터 하나를 가질 수 있지만, 데이터 발행 없이 바로 데이터 발생 완료 할 수 있음
+Single 클래스에 onComplete 이벤트가 추가됨
+
+## 뜨거운 Observable
+차가운 Observable은 subscribe() 함수를 호출하여 구독하지 않으면 데이터를 발행하지 않음(게으른 접근법)
+반면
+뜨거운 Observable은 구독자 존재 여부와 관계 없이 데이터를 발행 -> 여러 구독자를 고려할 수 있음 
+
+차가운 Observable : 구독자가 구독하면 준비된 데이터를 '처음 부터 발행' (ex: 웹 요청, DB 쿼리 읽기)
+뜨거운 Observable : 구독자가 구독하면 구독한 시점부터의 데이터를 발행받음 (ex: 마우스 이벤트, 키보드 이벤트 등)
+배압 : Observable 에서 데이터를 발행하느느 속도와 구독자가 처리하는 속도의 차가 클 떄 발행
+
+## Subject 클래스
+차가운 Observable 를 뜨거운 Observable로 바궈줌
+
+### AsyncSubject 클래스
+Observable 에서 발행한 마지막 데이터를 얻어올 수 있는 subject 클래스
+완료되기 전 마지막 데이터에만 관심이 있으며, 이전데이터는 무시
+
+### BehaviorSubject 클래스
+구독을 하면 가장 최근 값 혹은 기본값을 넘겨주는 클래스 
+
+### PublishSubject 클래스
+subscribe() 함수 호출시 값을 발행하기 시작
+해당 시간에 발생한 데이터를 그대로 구독자에게 전달 
+
+### ReplaySubject 클래스
+구독자가 생기면 항상 데이터의 처음부터 끝까지 발행하는 것을 보장해 줌
+모둔 데이터 내용을 저장해두는 과정 중 메모리 누수가 발생할 가능성이 있음
+뜨거움을 사용하지만 차가움처럼 동작(처음 부터 전체 발행)
+
+### ConnectableObservable 클래스
+차가운 -> 뜨거운으로 변경(구독시점부터 발행)
+subscribe() 를 호출해도 동작이 일어나지 않음
+connect() 함수는 호출 시점부터 subscribe() 함수를 호출한 구독자에게 데이터 발행
+
+무조건 connect() 함수를 호출해야 그때까지 구독했던 구독자 모두에게 데이터 발행
